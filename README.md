@@ -1,5 +1,5 @@
 # NotchFilter
-Design of a notch filter for cutting dc component using Python
+Design of a notch filter for removing dc component using Python
 
 https://en.wikipedia.org/wiki/Band-stop_filter
 
