@@ -2,44 +2,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 
-# Define transfer function parameters
-omega_c = 8.86e7  # Cutoff frequency in rad/s
-
-# Define the transfer function H(s) = s^2 / (s^2 + omega_c * s)
-numerator = [1, 0, 0]  # Coefficients for s^2
-denominator = [1, omega_c, 0]  # Coefficients for s^2 + omega_c * s
-
-# Construct the transfer function
+# Define the transfer function (e.g., H(s) = R**2 / (2*R + s*L))
+numerator = [16e-6]      # Numerator coefficients
+denominator = [90.3e-12, 8e-3] # Denominator coefficients
 system = signal.TransferFunction(numerator, denominator)
 
-# Define frequency range for the analysis
-frequencies = np.logspace(0, 8, 1000)  # Frequency range from 1 Hz to 100 MHz
-w = 2 * np.pi * frequencies  # Convert frequency to rad/s
+# Frequency response
+w, h = signal.freqresp(system)
 
-# Calculate frequency response
-w, mag, phase = signal.bode(system, w=w)
+# DC gain (value at zero frequency)
+dc_gain = h[0]
 
-# Create a figure with two subplots: one for magnitude and one for phase
-fig, ax1 = plt.subplots(figsize=(12, 6))
+# New transfer function without the DC component
+new_numerator = np.array(numerator) / dc_gain
+new_denominator = denominator
+new_system = signal.TransferFunction(new_numerator, new_denominator)
 
-# Plot the magnitude response
-ax1.semilogx(frequencies, mag, color='b', label='Magnitude (dB)')  # Magnitude in dB
-ax1.set_title("Frequency Response of the Transfer Function")
-ax1.set_xlabel("Frequency [Hz]")
-ax1.set_ylabel("Magnitude [dB]", color='b')
-ax1.tick_params(axis='y', labelcolor='b')
-ax1.grid()
+# Print the original and new transfer functions
+print("Original Transfer Function:", system)
+print("New Transfer Function (DC removed):", new_system)
 
-# Create a second y-axis for the phase response
-ax2 = ax1.twinx()  
-ax2.semilogx(frequencies, phase, color='r', label='Phase (degrees)')  # Phase in degrees
-ax2.set_ylabel("Phase [degrees]", color='r')
-ax2.tick_params(axis='y', labelcolor='r')
+# Plot the frequency response
+plt.figure()
+plt.subplot(2, 1, 1)
+plt.title('Original and DC-Removed Transfer Function Frequency Responses')
+plt.semilogx(w, 20 * np.log10(abs(h)), label='Original')
+plt.semilogx(w, 20 * np.log10(abs(signal.freqresp(new_system)[1])), label='DC-Removed', linestyle='--')
+plt.ylabel('Magnitude (dB)')
+plt.grid()
+plt.legend()
 
-# Optional: Add legends
-ax1.legend(loc='upper left')
-ax2.legend(loc='upper right')
+plt.subplot(2, 1, 2)
+plt.semilogx(w, np.angle(h), label='Original')
+plt.semilogx(w, np.angle(signal.freqresp(new_system)[1]), label='DC-Removed', linestyle='--')
+plt.ylabel('Phase (radians)')
+plt.xlabel('Frequency (rad/s)')
+plt.grid()
+plt.legend()
 
-# Show the plot
-plt.tight_layout()  # Adjust layout to prevent overlap
+plt.tight_layout()
 plt.show()
