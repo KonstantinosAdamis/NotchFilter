@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Constants
 R = 8e-3  # Resistance term in denominator
-L = 90.3e-12  # Capacitance term in denominator
+L = 90.3e-12  # Inductance term in denominator
 numerator_gain = 16e-6  # Gain in numerator
 
 # Frequency to notch (in Hz)
